@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meu Verso - Inspiração Diária</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <script src="https://unpkg.com/scrollreveal"></script>
+
+    <style>
+        :root {
+            --app-bg-color: #5d6660; 
+            --app-text-color: #e3d6a5; 
+            --app-dark-bg: #4a524c; 
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--app-bg-color); 
+            color: white; 
+            overflow-x: hidden; 
+        }
+
+        .text-highlight {
+            color: var(--app-text-color);
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+
+        /* ACRESCENTADO: Animação de pulso para incentivar o clique na notificação */
+        @keyframes pulse-shadow {
+            0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4); }
+            70% { box-shadow: 0 0 0 15px rgba(255, 255, 255, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
+        }
+
+        .hero-section {
+            padding: 80px 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+        }
+
+        /* ALTERADO: O container do celular agora é o palco para as telas deslizarem */
+        .phone-mockup {
+            width: 300px;
+            height: 600px;
+            border-radius: 40px;
+            border: 10px solid #1a1a1a;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7); 
+            margin: 0 auto;
+            position: relative; /* Necessário para conter as telas absolutas */
+            overflow: hidden; /* Esconde a tela que está fora do visor */
+            background-color: #000; /* Fundo preto caso haja delay na transição */
+            animation: float 6s ease-in-out infinite; 
+        }
+
+        .phone-mockup::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 25px;
+            background-color: #1a1a1a;
+            border-bottom-left-radius: 15px;
+            border-bottom-right-radius: 15px;
+            z-index: 20; /* Deve ficar acima de todas as telas */
+        }
+
+        /* ACRESCENTADO: Classe base para as telas do celular interativo */
+        .phone-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1); /* Transição suave de deslizamento */
+        }
+
+        /* ACRESCENTADO: Estilos específicos da Tela de Bloqueio */
+        .screen-lock {
+            background-color: #1f252a; 
+            background-image: 
+                linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.8)), 
+                url('https://images.unsplash.com/photo-1544390011-8ecb7218ca83?q=80&w=600&auto=format&fit=crop'); 
+            background-size: cover;
+            background-position: center;
+            justify-content: flex-start;
+            padding-top: 50px;
+            z-index: 2;
+            transform: translateX(0); /* Estado inicial: visível */
+        }
+
+        /* ACRESCENTADO: Estilos específicos da Tela do Aplicativo */
+        .screen-app {
+            background-color: var(--app-bg-color);
+            z-index: 3;
+            transform: translateX(100%); /* Estado inicial: escondida à direita */
+        }
+
+        /* ACRESCENTADO: Classes de estado ativadas pelo JavaScript ao clicar */
+        .phone-mockup.app-open .screen-lock {
+            transform: translateX(-30%) scale(0.95); /* Anima a tela de bloqueio indo para o fundo/esquerda */
+            opacity: 0.5;
+        }
+
+        .phone-mockup.app-open .screen-app {
+            transform: translateX(0); /* Traz o app para o centro da tela */
+        }
+
+        .lockscreen-time {
+            text-align: center;
+            font-size: 4.5rem;
+            font-weight: 300;
+            line-height: 1;
+            margin-bottom: 5px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+        
+        .lockscreen-date {
+            text-align: center;
+            font-size: 0.9rem;
+            margin-bottom: 40px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        /* Notificação interativa */
+        .notification-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 12px;
+            margin: 0 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            text-align: left;
+            color: #333;
+            cursor: pointer;
+            transition: transform 0.2s ease, background-color 0.2s ease;
+            animation: pulse-shadow 3s infinite; /* Destaca a notificação piscando a sombra */
+        }
+
+        .notification-card:hover {
+            transform: scale(1.03) translateY(-2px);
+            background: #ffffff;
+        }
+
+        .notification-header {
+            display: flex;
+            align-items: center;
+            font-size: 0.75rem;
+            color: #666;
+            margin-bottom: 6px;
+        }
+
+        .notification-icon {
+            width: 16px;
+            height: 16px;
+            background-color: var(--app-bg-color);
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 6px;
+            color: white;
+            font-size: 10px;
+        }
+
+        .notification-title {
+            font-weight: bold;
+            font-size: 0.9rem;
+            margin-bottom: 2px;
+        }
+
+        .notification-body {
+            font-size: 0.85rem;
+            line-height: 1.3;
+        }
+
+        /* Estilos do cabeçalho do App interativo */
+        .app-header {
+            padding: 40px 20px 15px 20px;
+            display: flex;
+            align-items: center;
+            color: white;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        /* ACRESCENTADO: Efeito de hover no ícone de voltar para indicar interatividade */
+        .app-header i {
+            font-size: 1.2rem;
+            margin-right: 20px;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 50%;
+            transition: background-color 0.2s ease;
+        }
+        
+        .app-header i:hover {
+            background-color: rgba(255,255,255,0.1);
+        }
+
+        .app-content {
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 30px;
+            text-align: center;
+            color: var(--app-text-color);
+            font-size: 1.1rem;
+            line-height: 1.5;
+        }
+
+        .feature-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            padding: 20px;
+            border-radius: 15px;
+            height: 100%; 
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-10px);
+            background-color: rgba(255, 255, 255, 0.05); 
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            color: var(--app-text-color); 
+            margin-bottom: 15px;
+            display: inline-block;
+            transition: transform 0.3s ease;
+        }
+
+        .feature-card:hover .feature-icon {
+            transform: scale(1.1); 
+        }
+
+        .btn-playstore {
+            background-color: var(--app-text-color);
+            color: var(--app-bg-color);
+            font-weight: bold;
+            padding: 12px 30px;
+            border-radius: 30px;
+            transition: all 0.3s;
+        }
+
+        .btn-playstore:hover {
+            background-color: white;
+            color: var(--app-bg-color);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn-pix {
+            background-color: #32bcad;
+            color: white;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            border: none;
+        }
+
+        .btn-pix:hover {
+            background-color: #269689;
+            color: white;
+            transform: scale(1.05);
+            box-shadow: 0 10px 20px rgba(50, 188, 173, 0.4);
+        }
+
+        .text-custom-muted {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .reveal {
+            visibility: hidden;
+        }        
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top" style="background-color: rgba(93, 102, 96, 0.9); backdrop-filter: blur(10px);">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="#">Meu Verso</a>
+        </div>
+    </nav>
+
+    <section class="hero-section">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6 mb-5 mb-lg-0 text-center text-lg-start">
+                    <h1 class="display-4 fw-bold mb-4 reveal-left">A sua porção <span class="text-highlight">diária</span> de fé e esperança.</h1>
+                    <p class="lead mb-4 text-custom-muted reveal-left delay-1">O aplicativo Meu Verso entrega mensagens edificantes diretamente no seu celular para fortalecer o seu dia.</p>
+                    
+                    <div class="reveal-left delay-2 mb-4">
+                        <a href="#" class="btn btn-playstore btn-lg text-decoration-none">
+                            <i class="bi bi-google-play me-2"></i> Baixar na Play Store
+                        </a>
+                    </div>
+                    
+                    <small class="text-custom-muted reveal-left delay-3">
+                       <i class="bi bi-arrow-down text-highlight fs-5 me-1"></i>
+                        Interaja com o celular tocando na notificação.
+                    </small>                                        
+                </div>
+
+                <div class="col-lg-6">
+                    <div class="phone-mockup reveal-bottom delay-2" id="interactivePhone">
+                        
+                        <!-- TELA 1: Tela de Bloqueio -->
+                        <div class="phone-screen screen-lock">
+                            <div class="lockscreen-time">07:59</div>
+                            <div class="lockscreen-date">Sáb., 4 de abr.</div>
+                            
+                            <!-- ALTERADO: onClick chama a função Javascript para abrir a tela do app -->
+                            <div class="notification-card" onclick="openSimulatedApp()" title="Toque para abrir o Meu Verso">
+                                <div class="notification-header">
+                                    <span class="notification-icon"><i class="bi bi-info"></i></span> Meu Verso • 1h
+                                </div>
+                                <div class="notification-title">Versículo do dia</div>
+                                <div class="notification-body">Lança o teu cuidado sobre o Senhor, e ele te susterá; jamais permitirá que o justo seja abalado. (Salmos 55:22)</div>
+                            </div>
+                        </div>
+
+                        <!-- TELA 2: Tela do Aplicativo (Escondida por padrão) -->
+                        <div class="phone-screen screen-app">
+                            <div class="app-header">
+                                <!-- ALTERADO: onClick chama a função Javascript para fechar a tela do app e voltar ao bloqueio -->
+                                <i class="bi bi-arrow-left" onclick="closeSimulatedApp()" title="Voltar"></i>
+                                <span>Meu Verso</span>
+                            </div>
+                            <div class="app-content">
+                                Lança o teu cuidado sobre o Senhor, e ele te susterá; jamais permitirá que o justo seja abalado.<br><br>(Salmos 55:22)
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-5" style="border-top: 1px solid rgba(255,255,255,0.1);">
+        <div class="container py-5">
+            <div class="row text-center mb-5">
+                <div class="col-12 reveal-bottom">
+                    <h2 class="fw-bold text-highlight">Como o app funciona</h2>
+                </div>
+            </div>
+            <div class="row g-4 text-center">
+                <div class="col-md-4 reveal-bottom delay-1">
+                    <div class="feature-card">
+                        <i class="bi bi-bell-fill feature-icon"></i>
+                        <h4 class="fw-bold">Notificações às 06h</h4>
+                        <p class="text-custom-muted">Todos os dias você receberá uma notificação diária às 06h. Se você baixou após esse horário, receba o de hoje reiniciando o aplicativo.</p>
+                    </div>
+                </div>
+                <div class="col-md-4 reveal-bottom delay-2">
+                    <div class="feature-card">
+                        <i class="bi bi-phone feature-icon"></i>
+                        <h4 class="fw-bold">Design Minimalista</h4>
+                        <p class="text-custom-muted">Um ambiente calmo e sem distrações, feito com cores pensadas para o seu conforto visual enquanto lê a Palavra.</p>
+                    </div>
+                </div>
+                <div class="col-md-4 reveal-bottom delay-3">
+                    <div class="feature-card">
+                        <i class="bi bi-heart-fill feature-icon"></i>
+                        <h4 class="fw-bold">Versículos Selecionados</h4>
+                        <p class="text-custom-muted">Textos bíblicos separados para trazer conforto, força e alegria para o seu dia a dia.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-5" style="background-color: transparent;">
+        <div class="container text-center reveal-bottom">
+            <h3 class="mb-3 text-highlight">Feito para abençoar o seu dia</h3>
+            <p class="mb-0 fs-5 text-custom-muted">Desenvolvido por: <strong class="text-white">Jeiel Miranda</strong></p>
+        </div>
+    </section>
+
+    <section class="py-5" style="background-color: var(--app-dark-bg); border-radius: 40px 40px 0 0;">
+        <div class="container text-center reveal-bottom">
+            <h3 class="fw-bold mb-3 text-white">Apoie este Ministério</h3>
+            <p class="mb-4 max-w-75 mx-auto text-custom-muted" style="max-width: 600px;">
+                O Meu Verso é mantido com muito carinho. Se o aplicativo tem abençoado a sua vida e deseja ajudar na manutenção, considere fazer uma oferta via Pix.
+            </p>
+            <button type="button" class="btn btn-pix btn-lg rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#pixModal">
+                <i class="bi bi-qr-code-scan me-2"></i> Ofertar com PIX
+            </button>
+        </div>
+    </section>
+
+    <!-- Modal Pix Original Mantido -->
+    <div class="modal fade" id="pixModal" tabindex="-1" aria-labelledby="pixModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg" style="background-color: var(--app-bg-color); color: white;">
+                <div class="modal-header text-white" style="background-color: #32bcad; border-bottom: none;">
+                    <h5 class="modal-title fw-bold" id="pixModalLabel"><i class="bi bi-suit-heart-fill me-2"></i>Apoio via Pix</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center p-4">
+                    <p class="mb-4 text-custom-muted">Copie a chave abaixo e cole no aplicativo do seu banco na opção <strong>"Pix Copia e Cola"</strong> ou transfira diretamente.</p>
+                    
+                    <div class="p-3 rounded-3 border mb-4" style="background-color: rgba(0,0,0,0.2); border-color: rgba(255,255,255,0.1) !important;">
+                        <span class="d-block small mb-1 text-highlight">Chave E-mail</span>
+                        <strong id="chavePixTexto" class="fs-5 text-break user-select-all text-white">jeiel.lima.miranda@gmail.com</strong>
+                    </div>
+
+                    <button id="btnCopiarPix" class="btn px-4 rounded-pill text-white border-white" style="border: 1px solid" onclick="copiarPix()">
+                        <i class="bi bi-clipboard me-2"></i> Copiar Chave
+                    </button>
+                </div>
+                <div class="modal-footer justify-content-center" style="border-top: 1px solid rgba(255,255,255,0.1);">
+                    <p class="small mb-0 text-highlight">Deus abençoe a sua vida grandemente!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="py-4 text-center" style="background-color: var(--app-dark-bg);">
+        <div class="container">
+            <p class="mb-2 text-custom-muted">&copy; 2026 Meu Verso. Todos os direitos reservados.</p>
+            <a href="#" class="text-custom-muted text-decoration-none small hover-white">Política de Privacidade</a> <span class="text-custom-muted">|</span> 
+            <a href="#" class="text-custom-muted text-decoration-none small hover-white">Termos de Uso</a>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Configuração ScrollReveal
+        const sr = ScrollReveal({
+            distance: '50px',
+            duration: 1000,
+            easing: 'cubic-bezier(0.25, 0.1, 0.25, 1)', 
+            reset: false 
+        });
+
+        sr.reveal('.reveal-left', { origin: 'left' });
+        sr.reveal('.reveal-left.delay-1', { origin: 'left', delay: 200 });
+        sr.reveal('.reveal-left.delay-2', { origin: 'left', delay: 400 });
+        sr.reveal('.reveal-left.delay-3', { origin: 'left', delay: 600 });
+
+        sr.reveal('.reveal-bottom', { origin: 'bottom' });
+        sr.reveal('.reveal-bottom.delay-1', { origin: 'bottom', delay: 200 });
+        sr.reveal('.reveal-bottom.delay-2', { origin: 'bottom', delay: 400 });
+        sr.reveal('.reveal-bottom.delay-3', { origin: 'bottom', delay: 600 });
+
+        // ACRESCENTADO: Funções JavaScript para controlar a interatividade do celular simulado
+        function openSimulatedApp() {
+            // Pega a div pai que engloba as telas do celular
+            const phone = document.getElementById('interactivePhone');
+            // Adiciona a classe 'app-open', o que faz o CSS disparar a transição de deslizamento das telas
+            phone.classList.add('app-open');
+        }
+
+        function closeSimulatedApp() {
+            const phone = document.getElementById('interactivePhone');
+            // Remove a classe 'app-open', fazendo as telas voltarem para o lugar original (tela de bloqueio)
+            phone.classList.remove('app-open');
+        }
+
+        // Função Pix original
+        function copiarPix() {
+            const spanChave = document.getElementById('chavePixTexto');
+            const btnCopy = document.getElementById('btnCopiarPix');
+            const textOriginal = btnCopy.innerHTML;
+            
+            const textArea = document.createElement("textarea");
+            textArea.value = spanChave.innerText;
+            document.body.appendChild(textArea);
+            textArea.select();
+            
+            try {
+                document.execCommand('copy');
+                
+                btnCopy.innerHTML = '<i class="bi bi-check-lg me-2"></i> Copiado!';
+                btnCopy.style.backgroundColor = '#32bcad';
+                btnCopy.style.borderColor = '#32bcad';
+                
+                setTimeout(() => {
+                    btnCopy.innerHTML = textOriginal;
+                    btnCopy.style.backgroundColor = 'transparent';
+                    btnCopy.style.borderColor = 'white';
+                }, 2500);
+                
+            } catch (err) {
+                console.error('Falha ao copiar a chave Pix', err);
+            }
+            
+            document.body.removeChild(textArea);
+        }
+    </script>
+</body>
+</html>
